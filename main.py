@@ -2,9 +2,14 @@ import pygame
 import random
 import neat
 import os
+import matplotlib.pyplot as plt
 
 pygame.init()
 font = pygame.font.SysFont(None, 24)
+
+# for the stats
+BEST_SCORES = []
+AVG_SCORES = []
 
 GEN = 0 # For the neat algorithm
 BEST_SCORE = 0
@@ -37,6 +42,13 @@ def collides(x1, y1, w1, h1, x2, y2, w2, h2):
         return True
     else:
         return False
+
+def increase_stat_counters(totalscores):
+    global BEST_SCORES
+    global AVG_SCORES
+
+    BEST_SCORES.append(max(totalscores))
+    AVG_SCORES.append(sum(totalscores)/len(totalscores))
 
 
 def draw_environment():
@@ -119,7 +131,7 @@ class BirdCollection():
             print("score = ", self.score)
             reset_triangles("left", self.score)
         
-        self.speed = 5 + self.score/30
+        # self.speed = 5 + self.score/30
 
         if self.side == "left":
             self.x += self.speed
@@ -194,6 +206,8 @@ def main(genomes, config):
     global TRIANGLES
     GEN += 1
 
+    TOTALSCORES = []
+
     nets = []
     ge = []
     BIRDS = BirdCollection()
@@ -218,6 +232,7 @@ def main(genomes, config):
                     BIRDS.jump()
 
         if len (BIRDS.birds) == 0:
+            increase_stat_counters(TOTALSCORES)
             run = False
             break
         
@@ -266,6 +281,7 @@ def main(genomes, config):
                 BIRDS.birds.remove(BIRDS.birds[x])
                 nets.remove(nets[x])
                 ge.remove(ge[x])
+                TOTALSCORES.append(BIRDS.score)
 
 
         # we draw the screen
@@ -275,7 +291,22 @@ def main(genomes, config):
         for i in TRIANGLES:
             i.draw()
 
-        pygame.display.flip()       
+        pygame.display.flip()
+
+    
+    # generates a plot of the BEST_SCORES and the AVG_SCORES and saves it to a file
+    plt.plot(BEST_SCORES, label="best scores")
+    plt.plot(AVG_SCORES, label="average scores")
+    plt.xlabel("Generation")
+    plt.legend()
+    plt.savefig("plot.png")
+
+    # resets the figure
+    plt.clf()
+    
+
+    print(BEST_SCORES)
+    print(AVG_SCORES)      
 
 def run(config_path):
     config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
