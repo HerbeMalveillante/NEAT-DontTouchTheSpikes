@@ -3,6 +3,7 @@ import random
 import neat
 import os
 import matplotlib.pyplot as plt
+import visualize
 
 pygame.init()
 font = pygame.font.SysFont(None, 24)
@@ -230,6 +231,8 @@ def main(genomes, config):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     BIRDS.jump()
+                elif event.key == pygame.K_RETURN:
+                    visualize.draw_net(config, ge[0])
 
         if len (BIRDS.birds) == 0:
             increase_stat_counters(TOTALSCORES)
